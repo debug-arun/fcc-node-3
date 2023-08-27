@@ -35,7 +35,10 @@ let dnsmap = {};
 
 app.post('/api/shorturl', (req, res) => {
   let url = req.body.url, flag = true;
-  if(!url.startsWith('https://')) url = 'https://'+url;
+  if(!url.startsWith('https://')) {
+    res.json({error: 'invalid url'})
+    return;
+  }
   dns.lookup(url, (err, address, family) => {
     if(err) {
       flag = false;
@@ -49,6 +52,7 @@ app.post('/api/shorturl', (req, res) => {
     short_url = parseInt(Math.random()*100000);
   }
   dnsmap[short_url] = url;
+  console.log(dnsmap);
   res.json({original_url:url, short_url});
 });
 
@@ -60,8 +64,6 @@ app.get('/api/shorturl/:shorturl', (req, res) => {
   }
   res.redirect(dnsmap[short_url]);
 });
-
-app.get('/api/map', (req, res) => res.send(dnsmap))
 
 app.listen(port, function() {
   console.log(`Listening on port ${port}`);
