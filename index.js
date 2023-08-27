@@ -45,16 +45,14 @@ app.get('/api/hello', function(req, res) {
 app.post('/api/shorturl', (req, res) => {
   let url = req.body.url, flag = true;
   if(!url.startsWith('https://')) {
-    res.json({error: 'invalid url'})
-    return;
+    return res.status(404).json({error: 'invalid url'})
   }
   dns.lookup(url, (err, address, family) => {
     if(err) {
       flag = false;
-      res.json({error: 'invalid url'});
-      return;
+      return res.status(404).json({error: 'invalid url'});
     }
-  })
+  });
   if(!flag) return;
   let short_url = parseInt(Math.random()*100000);
   const entry = new URL({
@@ -62,17 +60,23 @@ app.post('/api/shorturl', (req, res) => {
     short_url
   })
   entry.save();
-  res.json({original_url: url, short_url});
+  return res.json({original_url: url, short_url});
 });
 
 app.get('/api/shorturl/:shorturl', (req, res) => {
-  let short_url = req.params.shorturl;
-  URL.findOne({short_url}).then((data) => {
-    // res.redirect(data.original_url);
-    res.redirect(data.original_url);
-    console.log(data.original_url);
-  }).catch((err) => console.error(err));
-  // res.send("Lets wait and see");
+  try {
+    let short_url = req.params.shorturl;
+    URL.findOne({short_url}).then((data) => {
+      console.log(data.original_url);
+      return res.redirect(data.original_url);
+    }).catch((err) => {
+      console.error(err);
+      return res.status(404).json('No URL found');
+    });
+  } catch(err) { 
+    console.error(err); 
+    return res.status(500).json('Server error');
+  }
 });
 
 app.listen(port, function() {
