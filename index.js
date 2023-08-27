@@ -11,10 +11,11 @@ const URLValidate = require('url').URL;
 
 const URL = URLModel;
 
+const urlPattern = /^(https?|http):\/\/.+$/;
+
 let stringIsAValidUrl = (url) => {
   try {
-    new URLValidate(url);
-    return true;
+    return urlPattern.test(url);
   } catch (err) {
     return false;
   }
