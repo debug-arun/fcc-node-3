@@ -13,7 +13,7 @@ const URL = URLModel;
 
 let stringIsAValidUrl = (url) => {
   try {
-    new URLValidate(s);
+    new URLValidate(url);
     return true;
   } catch (err) {
     return false;
@@ -58,12 +58,14 @@ app.post('/api/shorturl', (req, res) => {
   if(!stringIsAValidUrl(url)) {
     return res.json({error: 'invalid url'})
   }
+  // URL.findOne({original_url: url}).then((data) => {
+  //   if(data) {
+  //     console.log(data);
+  //     flag = false;
+  //     return res.status(200).json({original_url: data.original_url, short_url: data.short_url});
+  //   }
+  // }).catch((err)=>res.status(500).json({'Internal error': err}));
   if(!flag) return;
-  URL.find({original_url: url}).then((data) => {
-    if(data) {
-      return res.status(200).json({original_url: data.original_url, short_url: data.short_url});
-    }
-  }).catch((err)=>res.status(500).json({'Internal error': err}));
   let short_url = parseInt(Math.random()*100000);
   const entry = new URL({
     original_url: url,
