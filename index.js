@@ -44,21 +44,21 @@ app.post('/api/shorturl', (req, res) => {
     }
   })
   if(!flag) return;
-  let shorturl = parseInt(Math.random()*100000);
-  while(dnsmap[shorturl] != undefined) {
-    shorturl = parseInt(Math.random()*100000);
+  let short_url = parseInt(Math.random()*100000);
+  while(dnsmap[short_url] != undefined) {
+    short_url = parseInt(Math.random()*100000);
   }
-  dnsmap[shorturl] = url;
-  res.json({originalurl:url, shorturl});
+  dnsmap[short_url] = url;
+  res.json({original_url:url, short_url});
 });
 
 app.get('/api/shorturl/:shorturl', (req, res) => {
-  let shorturl = req.params.shorturl;
-  if(dnsmap[shorturl] == undefined) {
+  let short_url = req.params.shorturl;
+  if(dnsmap[short_url] == undefined) {
     res.json({error: "shorturl doesn't exist"});
     return;
   }
-  res.redirect(dnsmap[shorturl]);
+  res.redirect(dnsmap[short_url]);
 });
 
 app.get('/api/map', (req, res) => res.send(dnsmap))
