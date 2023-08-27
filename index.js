@@ -7,12 +7,17 @@ const app = express();
 const mongoose = require('mongoose');
 const { URLModel } = require('./URLSchema');
 
+const URLValidate = require('url').URL;
+
 const URL = URLModel;
 
-var validUrl = require('valid-url');
-
 let stringIsAValidUrl = (url) => {
-  return (validUrl.isUri(url));
+  try {
+    new URLValidate(s);
+    return true;
+  } catch (err) {
+    return false;
+  }
 }
 
 mongoose.connect(process.env.MONGO_URI).then(() => {
@@ -50,11 +55,15 @@ app.get('/api/hello', function(req, res) {
 
 app.post('/api/shorturl', (req, res) => {
   let url = req.body.url, flag = true;
-  console.log(url)
   if(!stringIsAValidUrl(url)) {
     return res.json({error: 'invalid url'})
   }
   if(!flag) return;
+  URL.find({original_url: url}).then((data) => {
+    if(data) {
+      return res.status(200).json({original_url: data.original_url, short_url: data.short_url});
+    }
+  }).catch((err)=>res.status(500).json({'Internal error': err}));
   let short_url = parseInt(Math.random()*100000);
   const entry = new URL({
     original_url: url,
