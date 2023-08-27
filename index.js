@@ -55,6 +55,8 @@ app.post('/api/shorturl', (req, res) => {
   })
 });
 
+app.get('/api/map', (req, res) => res.send(dnsmap));
+
 app.get('/api/shorturl/:shorturl', (req, res) => {
   let short_url = req.params.shorturl;
   if(dnsmap[short_url] == undefined) {
