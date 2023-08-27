@@ -9,6 +9,12 @@ const { URLModel } = require('./URLSchema');
 
 const URL = URLModel;
 
+var validUrl = require('valid-url');
+
+let stringIsAValidUrl = (url) => {
+  return (validUrl.isUri(url));
+}
+
 mongoose.connect(process.env.MONGO_URI).then(() => {
   return mongoose.connection.db.admin().listDatabases();
 }).then((databases) => {
@@ -44,15 +50,10 @@ app.get('/api/hello', function(req, res) {
 
 app.post('/api/shorturl', (req, res) => {
   let url = req.body.url, flag = true;
-  if(!url.startsWith('https://')) {
-    return res.status(404).json({error: 'invalid url'})
+  console.log(url)
+  if(!stringIsAValidUrl(url)) {
+    return res.json({error: 'invalid url'})
   }
-  dns.lookup(url, (err, address, family) => {
-    if(err) {
-      flag = false;
-      return res.status(404).json({error: 'invalid url'});
-    }
-  });
   if(!flag) return;
   let short_url = parseInt(Math.random()*100000);
   const entry = new URL({
@@ -63,7 +64,7 @@ app.post('/api/shorturl', (req, res) => {
   return res.json({original_url: url, short_url});
 });
 
-app.get('/api/shorturl/:shorturl', (req, res) => {
+app.get('/api/shorturl/:shorturl?', (req, res) => {
   try {
     let short_url = req.params.shorturl;
     URL.findOne({short_url}).then((data) => {
